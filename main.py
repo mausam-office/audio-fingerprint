@@ -38,8 +38,8 @@ async def upload(
         create_dirs()
         read_conf()
 
-    filename = file.filename
-    file_ext = filename.split('.').pop()    # type:ignore
+    wav_filename = file.filename
+    file_ext = wav_filename.split('.').pop()    # type:ignore
     if file_ext != 'wav':
         debug_error_log(f"INFO: File with `{file_ext}` extension provided instead of `.wav`.")
         return {
@@ -53,7 +53,7 @@ async def upload(
     os.makedirs(ROOT_UPLOAD_DIR, exist_ok=True)     # type:ignore
     uploaded_filepath = f"{ROOT_UPLOAD_DIR}/{filename}"
     
-    debug_error_log(f"INFO: Request with file {filename}")
+    debug_error_log(f"INFO: Requested advertisement `{name}` with file {wav_filename}")
     advertisement_name = filename[:-4]
 
     try:
