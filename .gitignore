@@ -1,0 +1,7 @@
+*.pyc
+audio-data/
+configs/
+venv/
+.env
+debug_error.log
+main-copy.py

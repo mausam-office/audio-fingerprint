@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: dejavu
+Version: 0.1
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: psycopg2
+Requires-Dist: pydub
+Requires-Dist: scipy
