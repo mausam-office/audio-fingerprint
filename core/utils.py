@@ -26,9 +26,10 @@ def adv_exists(djv, uploaded_filepath):
         input_confidence = results_check['results'][0]['input_confidence']
         if fingerprinted_confidence > 0.8 and input_confidence > 0.9:
             advertisement_id = results_check['results'][0]['song_id']
+            advertisement_name = str(results_check['results'][0]['song_name'], encoding='utf-8')
             os.remove(uploaded_filepath)
-            return True, advertisement_id
-    return False, None
+            return True, advertisement_id, advertisement_name
+    return False, None, None
 
 
 async def create_fingerprint(djv, uploaded_filepath):

@@ -64,15 +64,16 @@ async def upload(
         debug_error_log("ERROR: " + str(e))      # type:ignore
 
     djv = init_dejavu(CONFIG_PATH)
-    adv_sts, stored_advert_id = adv_exists(djv, uploaded_filepath)
+    adv_sts, stored_advert_id, stored_advert_name = adv_exists(djv, uploaded_filepath)
 
     if adv_sts:
-        debug_error_log(f"INFO: Advertisement `{advertisement_name}`  already exists.")
+        debug_error_log(f"INFO: Advertisement `{stored_advert_name}`  already exists.")
         return {
             "success"   : False, 
             "status"    : http.HTTPStatus.NOT_ACCEPTABLE,
             'message'   : 'Advertisemet already exists',
-            "advertisement_id" : stored_advert_id
+            "registered_id" : stored_advert_id,
+            "registered_name" : stored_advert_name
         }
     
     await create_fingerprint(djv, uploaded_filepath)
