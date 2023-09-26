@@ -1,3 +1,4 @@
+"""Author: Mausam Rajbanshi (AI Engineer)"""
 from datetime import datetime
 import json
 import os
@@ -11,7 +12,7 @@ def init_dejavu(config_path):
     try:
         return Dejavu(config)
     except Exception as e:
-        print(e)
+        debug_error_log("ERROR: " + str(e))      # type:ignore
 
 
 def adv_exists(djv, uploaded_filepath):
@@ -24,9 +25,10 @@ def adv_exists(djv, uploaded_filepath):
         fingerprinted_confidence = results_check['results'][0]['fingerprinted_confidence']
         input_confidence = results_check['results'][0]['input_confidence']
         if fingerprinted_confidence > 0.8 and input_confidence > 0.9:
+            advertisement_id = results_check['results'][0]['song_id']
             os.remove(uploaded_filepath)
-            return True
-    return False
+            return True, advertisement_id
+    return False, None
 
 
 async def create_fingerprint(djv, uploaded_filepath):

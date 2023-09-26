@@ -1,3 +1,4 @@
+"""Author: Mausam Rajbanshi (AI Engineer)"""
 import psycopg2
 from .utils import debug_error_log
 
@@ -35,7 +36,7 @@ def execute_query(query:str, values:tuple=(), insert:bool=False, req_response:bo
             # print(f"{data = }")
 
     except (Exception, psycopg2.DatabaseError) as error:
-        debug_error_log(f"Error \n{error}")
+        debug_error_log(f"Error \n{str(error)}")
     finally:
         if cur is not None:
             cur.close()

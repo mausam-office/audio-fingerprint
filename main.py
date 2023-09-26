@@ -1,8 +1,7 @@
-# import ast
+"""Author: Mausam Rajbanshi (AI Engineer)"""
 import json
 import os
 import http
-import shutil
 import uvicorn
 
 from core.utils import adv_exists, init_dejavu, create_fingerprint, debug_error_log
@@ -15,7 +14,6 @@ app = FastAPI(title="Audio-API")
 
 
 ROOT_UPLOAD_DIR = config('ROOT_UPLOAD_DIR')
-BACKUP_DIR = config('BACKUP_DIR')
 FILE_EXTENSION = config('FILE_EXTENSION')
 CONFIG_DIR = config('CONFIG_DIR')
 CONFIG_PATH = config('CONFIG_PATH')
@@ -32,13 +30,18 @@ async def upload(
     file:UploadFile = File(...)
     ):
 
-    advertisement_id = None
+    try:
+        assert os.path.exists(ROOT_UPLOAD_DIR)
+        assert os.path.exists(CONFIG_PATH)
+    except Exception as e:
+        debug_error_log("ERROR: " + "Assersion Error")      # type:ignore
+        create_dirs()
+        read_conf()
 
     filename = file.filename
-    # print(f"{filename = }")
-    file_ext = filename.split('.').pop()
+    file_ext = filename.split('.').pop()    # type:ignore
     if file_ext != 'wav':
-        debug_error_log(f"File with `{file_ext}` extension provided instead of `.wav`.")
+        debug_error_log(f"INFO: File with `{file_ext}` extension provided instead of `.wav`.")
         return {
             "success"   : False, 
             "status"    : http.HTTPStatus.NOT_ACCEPTABLE, 
@@ -46,42 +49,49 @@ async def upload(
         }
 
     filename = name if name.endswith('.wav') else name + '.wav'
+
+    os.makedirs(ROOT_UPLOAD_DIR, exist_ok=True)     # type:ignore
     uploaded_filepath = f"{ROOT_UPLOAD_DIR}/{filename}"
     
-    debug_error_log(f"Request with file {filename}")
+    debug_error_log(f"INFO: Request with file {filename}")
     advertisement_name = filename[:-4]
-    advertisement_id = get_advertisement_id(advertisement_name)
 
-    with open(uploaded_filepath, 'wb') as f:
-        content = await file.read()
-        f.write(content)
-    
+    try:
+        with open(uploaded_filepath, 'wb') as f:
+            content = await file.read()
+            f.write(content)
+    except Exception as e:
+        debug_error_log("ERROR: " + str(e))      # type:ignore
+
     djv = init_dejavu(CONFIG_PATH)
-    adv_sts = adv_exists(djv, uploaded_filepath)
+    adv_sts, stored_advert_id = adv_exists(djv, uploaded_filepath)
 
-    if adv_sts or advertisement_id:
-        print(f"Advertisemet `{advertisement_name}`  already exists.")
+    if adv_sts:
+        debug_error_log(f"INFO: Advertisement `{advertisement_name}`  already exists.")
         return {
             "success"   : False, 
             "status"    : http.HTTPStatus.NOT_ACCEPTABLE,
-            'message'   : 'Advertisemet already exists'
+            'message'   : 'Advertisemet already exists',
+            "advertisement_id" : stored_advert_id
         }
     
     await create_fingerprint(djv, uploaded_filepath)
 
     # grab the song/advertisement id 
-    # print(f"2. {advertisement_name = }")
-    advertisement_id = get_advertisement_id(advertisement_name)
+    new_advert_id = get_advertisement_id(advertisement_name)
 
+    # # File is already stored in table. 
+    # # Not necessary to store in disk. Just remove
     try:
-        shutil.move(uploaded_filepath, BACKUP_DIR)
-    except shutil.Error as error:
         os.remove(uploaded_filepath)
+    except Exception as e:
+        debug_error_log("ERROR: " + str(e))      # type:ignore
+
     return {
         "success"   : True,
         "status"    : http.HTTPStatus.CREATED,
         "message"   : "Advertisement Created",
-        "advertisement_id" : advertisement_id
+        "advertisement_id" : new_advert_id
     }
 
 
@@ -96,14 +106,21 @@ def read_conf():
 
     # conf file works for double quotation only as dictionary uses single quotation
     conf = json.dumps(conf)
+    try: 
+        with open("D:/Anaconda/Audio-FingerPrinting/FastAPI-Application/venv/Scripts/configs/dejavu.cnf.SAMPLE", 'w') as dejavu_conf_file:
+            dejavu_conf_file.write(conf)
+    except Exception as e:
+        debug_error_log("ERROR: " + e)      # type:ignore
 
-    with open("D:/Anaconda/Audio-FingerPrinting/FastAPI-Application/venv/Scripts/configs/dejavu.cnf.SAMPLE", 'w') as dejavu_conf_file:
-        dejavu_conf_file.write(conf)
 
 def create_dirs():
-    for dir in [ROOT_UPLOAD_DIR, BACKUP_DIR, CONFIG_DIR]:
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+    for dir in [ROOT_UPLOAD_DIR, CONFIG_DIR]:
+        try:
+            if not os.path.exists(dir):
+                os.makedirs(dir)    # type:ignore
+        except Exception as e:
+            debug_error_log("ERROR: " + e)      # type:ignore
+
 
 if __name__ == "__main__":
     create_dirs()
