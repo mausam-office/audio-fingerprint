@@ -15,15 +15,15 @@ def execute_query(query:str, values:tuple=(), insert:bool=False, req_response:bo
     try:
         conn = db_connection()
         cur = conn.cursor()
-        if insert or values:
+        if insert:
             if values:
-                debug_error_log('Values not supplied for query')
+                debug_error_log('INFO: Values not supplied for query')
                 return
             cur.execute(query, values)
         else:
             if values:
-                debug_error_log('Does your query requrires values? ')
-                debug_error_log('Executing without using values')
+                debug_error_log('INFO: Does your query requrires values? ')
+                debug_error_log('INFO: Executing without using values')
             cur.execute(query)
         conn.commit()
         
