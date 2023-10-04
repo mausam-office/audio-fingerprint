@@ -151,6 +151,7 @@ def create_dirs():
 
 
 if __name__ == "__main__":
+    debug_error_log("App Started")
     create_dirs()
     read_conf()
     
