@@ -1,10 +1,15 @@
 """Author: Mausam Rajbanshi (AI Engineer)"""
 import psycopg2
 from .utils import debug_error_log
+from decouple import config
 
 
 def db_connection():
-    conn = psycopg2.connect("dbname=dejavu user=postgres password=root")
+    conn = psycopg2.connect(f"""
+                            dbname={config('DATABASE')} 
+                            user={config('USER')}  
+                            password={config('PASSWORD')} 
+            """)
     return conn
 
 def execute_query(query:str, values:tuple=(), insert:bool=False, req_response:bool=False, top_n_rows:int=-1):
