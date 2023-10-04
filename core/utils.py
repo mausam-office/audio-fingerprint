@@ -16,10 +16,14 @@ def init_dejavu(config_path):
 
 
 def adv_exists(djv, uploaded_filepath):
-    results_check = djv.recognize(
-        FileRecognizer, 
-        uploaded_filepath
-    )
+    try:
+        results_check = djv.recognize(
+            FileRecognizer, 
+            uploaded_filepath
+        )
+    except Exception as e:
+        debug_error_log(str(e))
+        return False, None, None
 
     if results_check['results']:
         fingerprinted_confidence = results_check['results'][0]['fingerprinted_confidence']
