@@ -6,6 +6,7 @@ import requests
 import uvicorn
 
 from core.utils import adv_exists, init_dejavu, create_fingerprint, debug_error_log
+from core.utils import get_bitrate
 from core.db import get_advertisement_id
 from decouple import config
 from fastapi import FastAPI, UploadFile, File
@@ -17,6 +18,7 @@ app = FastAPI(title="Audio-API")
 
 
 ROOT_UPLOAD_DIR = config('ROOT_UPLOAD_DIR')
+ROOT_TEMP_DIR = config('ROOT_TEMP_DIR')
 FILE_EXTENSION = config('FILE_EXTENSION')
 CONFIG_DIR = config('CONFIG_DIR')
 CONFIG_PATH = config('CONFIG_PATH')
@@ -103,6 +105,7 @@ async def upload(
 def test_valid_channel(url):
     # Configure the number of retries and backoff strategy
     retries = Retry(total=3, backoff_factor=0.5)
+    bitrate = 0
 
     # Create a session with the retry settings
     session = requests.Session()
@@ -111,6 +114,8 @@ def test_valid_channel(url):
     try:
         response = session.get(url, stream=True)
         success = True if response.status_code == 200 else False
+        if success: 
+            bitrate = get_bitrate(response, ROOT_TEMP_DIR)
 
     except requests.exceptions.SSLError as e:
         debug_error_log(str(e))
@@ -120,7 +125,8 @@ def test_valid_channel(url):
         return {
             "success":success,
             "status":http.HTTPStatus.ACCEPTED if success else http.HTTPStatus.NOT_ACCEPTABLE,
-            "message":f"Url {'can' if success else 'cannot'} be used."
+            "message":f"Url {'can' if success else 'cannot'} be used.",
+            "bitrate": bitrate
         }
 
 
@@ -143,7 +149,7 @@ def read_conf():
 
 
 def create_dirs():
-    for dir in [ROOT_UPLOAD_DIR, CONFIG_DIR]:
+    for dir in [ROOT_UPLOAD_DIR, ROOT_TEMP_DIR, CONFIG_DIR]:
         try:
             if not os.path.exists(dir):
                 os.makedirs(dir)    # type:ignore
