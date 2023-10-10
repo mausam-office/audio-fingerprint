@@ -95,7 +95,8 @@ async def upload(
         "success"   : True,
         "status"    : http.HTTPStatus.CREATED,
         "message"   : "Advertisement Created",
-        "advertisement_id" : new_advert_id
+        "registered_id" : new_advert_id,
+        "registered_name" : name
     }
 
 @app.get("/valid/channel")
