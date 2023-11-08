@@ -142,7 +142,8 @@ def read_conf():
     # conf file works for double quotation only as dictionary uses single quotation
     conf = json.dumps(conf)
     try: 
-        with open("D:/Anaconda/Audio-FingerPrinting/FastAPI-Application/venv/Scripts/configs/dejavu.cnf.SAMPLE", 'w') as dejavu_conf_file:
+        # with open("D:/Anaconda/Audio-FingerPrinting/FastAPI-Application/venv/Scripts/configs/dejavu.cnf.SAMPLE", 'w') as dejavu_conf_file:
+        with open("C:/python-apps/Advertisement-APP/venv/Scripts/configs/dejavu.cnf.SAMPLE", 'w') as dejavu_conf_file:
             dejavu_conf_file.write(conf)
     except Exception as e:
         debug_error_log("ERROR: " + e)      # type:ignore
@@ -162,4 +163,4 @@ if __name__ == "__main__":
     create_dirs()
     read_conf()
     
-    uvicorn.run("main:app", host="0.0.0.0", port=2470, log_level="info", reload=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=2468, log_level="info", reload=False)

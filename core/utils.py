@@ -43,7 +43,8 @@ async def create_fingerprint(djv, uploaded_filepath):
     
 
 def debug_error_log(text:str, timestamp:bool=True):
-    with open("D:/Anaconda/Audio-FingerPrinting/FastAPI-Application/debug_error.log", 'a') as err_file:
+    # with open("D:/Anaconda/Audio-FingerPrinting/FastAPI-Application/debug_error.log", 'a') as err_file:
+    with open("C:/python-apps/Advertisement-APP/audio-fingerprint/debug_error.log", 'a') as err_file:
         text = f"{datetime.now()} {text}" if timestamp else text
         print(text, file=err_file)
 
