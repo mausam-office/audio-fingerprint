@@ -14,6 +14,9 @@ from fastapi import FastAPI, UploadFile, File
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from dejavu import Dejavu
+from dejavu.logic.recognizer.file_recognizer import FileRecognizer
+
 app = FastAPI(title="Audio-API")
 
 
@@ -128,6 +131,58 @@ def test_valid_channel(url):
             "message":f"Url {'can' if success else 'cannot'} be used.",
             "bitrate": bitrate
         }
+
+@app.get("/match")
+async def match_results(
+    name: str = '',
+    file:UploadFile = File(...)
+    ):
+    
+    try:
+        assert os.path.exists(ROOT_UPLOAD_DIR)
+        assert os.path.exists(CONFIG_PATH)
+    except Exception as e:
+        debug_error_log("ERROR: " + "Assersion Error")      # type:ignore
+        create_dirs()
+        read_conf()
+    
+    wav_filename = file.filename
+    file_ext = wav_filename.split('.').pop()    # type:ignore
+    if file_ext != 'wav':
+        debug_error_log(f"INFO: File with `{file_ext}` extension provided instead of `.wav`.")
+        return {
+            "success"   : False, 
+            "status"    : http.HTTPStatus.NOT_ACCEPTABLE, 
+            'message'   : 'File with `.wav` extension is only accepted.'
+        }
+    os.makedirs(ROOT_UPLOAD_DIR, exist_ok=True)     # type:ignore
+    uploaded_filepath = f"{ROOT_UPLOAD_DIR}/{wav_filename}"
+
+    try:
+        with open(uploaded_filepath, 'wb') as f:
+            content = await file.read()
+            f.write(content)
+    except Exception as e:
+        debug_error_log("ERROR writing audio: " + str(e))      # type:ignore
+    
+    djv = init_dejavu(CONFIG_PATH)
+    results_check = {}
+    try:
+        if isinstance(djv, Dejavu):
+            results_check = djv.recognize(
+                FileRecognizer, 
+                uploaded_filepath
+            )
+    except Exception as e:
+        debug_error_log("" + str(e))
+        results_check['error'] = str(e)
+    
+    try:
+        os.remove(uploaded_filepath)
+    except Exception as e:
+        debug_error_log("ERROR removing file: " + str(e))      # type:ignore
+
+    return results_check
 
 
 def read_conf():
