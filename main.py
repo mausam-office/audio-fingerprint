@@ -132,7 +132,7 @@ def test_valid_channel(url):
             "bitrate": bitrate
         }
 
-@app.get("/match")
+@app.post("/match")
 async def match_results(
     name: str = '',
     file:UploadFile = File(...)
@@ -182,7 +182,7 @@ async def match_results(
     except Exception as e:
         debug_error_log("ERROR removing file: " + str(e))      # type:ignore
 
-    return results_check
+    return {"results":str(results_check)}
 
 
 def read_conf():
