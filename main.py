@@ -6,7 +6,7 @@ import requests
 import uvicorn
 
 from core.utils import adv_exists, init_dejavu, create_fingerprint, debug_error_log
-from core.utils import get_bitrate
+from core.utils import get_bitrate, remove_quatation_marks
 from core.db import get_advertisement_id
 from decouple import config
 from fastapi import FastAPI, UploadFile, File
@@ -52,7 +52,7 @@ async def upload(
             "status"    : http.HTTPStatus.NOT_ACCEPTABLE, 
             'message'   : 'File with `.wav` extension is only accepted.'
         }
-
+    name = remove_quatation_marks(name)
     filename = name if name.endswith('.wav') else name + '.wav'
 
     os.makedirs(ROOT_UPLOAD_DIR, exist_ok=True)     # type:ignore

@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import os
 import re
+import string
 import subprocess
 from dejavu import Dejavu
 from dejavu.logic.recognizer.file_recognizer import FileRecognizer
@@ -92,3 +93,8 @@ def get_bitrate(response, ROOT_TEMP_DIR):
                 bitrate = int(match.group(1)) if match else 0
             
     return bitrate
+
+def remove_quatation_marks(original_str:str):
+    '''removes quatation marks''' 
+    modified_str = original_str.translate(str.maketrans('', '', '"'))   # removes all quotation marks
+    return modified_str
